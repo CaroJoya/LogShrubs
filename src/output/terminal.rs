@@ -1,6 +1,6 @@
 // src/output/terminal.rs
 
-use crate::model::{ErrorSpike, ErrorSummary, Stats};
+use crate::model::{ErrorSpike, ErrorSummary, HttpSummary, Stats};
 
 /// Print a Stats summary to stdout in human-readable form.
 pub fn print_stats(source: &str, stats: &Stats) {
@@ -95,5 +95,41 @@ fn truncate(s: &str, max: usize) -> String {
         let mut out: String = s.chars().take(max.saturating_sub(1)).collect();
         out.push('…');
         out
+    }
+}
+
+/// Print an HttpSummary in human-readable form.
+pub fn print_http(source: &str, summary: &HttpSummary, top_n: usize) {
+    println!("HTTP ANALYSIS");
+    println!("─────────────────────────────────");
+    println!("File        {}", source);
+    println!("Requests    {}", summary.total_requests);
+    println!();
+
+    if summary.total_requests == 0 {
+        println!("(no HTTP requests detected)");
+        return;
+    }
+
+    println!("2xx         {:>6}", summary.s2xx);
+    println!("3xx         {:>6}", summary.s3xx);
+    println!("4xx         {:>6}", summary.s4xx);
+    println!("5xx         {:>6}", summary.s5xx);
+    println!("Other       {:>6}", summary.other);
+    println!();
+
+    if summary.top_endpoints.is_empty() {
+        return;
+    }
+
+    println!("TOP ENDPOINTS");
+    println!("─────────────────────────────────");
+    for (i, entry) in summary.top_endpoints.iter().take(top_n).enumerate() {
+        println!(
+            "{:>2}. {:<40} {:>6}",
+            i + 1,
+            truncate(&entry.path, 40),
+            entry.count
+        );
     }
 }
