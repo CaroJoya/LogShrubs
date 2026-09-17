@@ -1,5 +1,5 @@
 // src/model.rs
-
+#[allow(dead_code)]
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 

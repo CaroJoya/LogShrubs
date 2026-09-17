@@ -1,10 +1,13 @@
 // src/main.rs
-#![allow(dead_code)]   
+
+mod analyzer;
 mod cli;
 mod input;
 mod model;
+mod output;
 mod parser;
 
+use analyzer::StatsAccumulator;
 use clap::Parser;
 use cli::{Cli, Command};
 use input::LogReader;
@@ -14,9 +17,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match cli.command {
         Command::Analyze { file, top: _ } => {
+            // Still temporary — full analyze comes in Step 7.
+            // For now, just parse and print first 20 events.
             let reader = LogReader::open(&file)?;
             let mut count: u64 = 0;
-
             for line in reader {
                 let event = parser::parse_line(&line);
                 println!(
@@ -32,15 +36,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
         }
+
         Command::Errors { file, top } => {
             println!("[errors] file={:?} top={}", file, top);
         }
+
         Command::Stats { file } => {
-            println!("[stats] file={:?}", file);
+            let reader = LogReader::open(&file)?;
+            let source = reader.path().display().to_string();
+
+            let mut acc = StatsAccumulator::new();
+            for line in reader {
+                let event = parser::parse_line(&line);
+                acc.observe(&event);
+            }
+            let stats = acc.finish();
+
+            output::terminal::print_stats(&source, &stats);
         }
+
         Command::Http { file, top } => {
             println!("[http] file={:?} top={}", file, top);
         }
+
         Command::Version => {
             println!("loglens {}", env!("CARGO_PKG_VERSION"));
         }
