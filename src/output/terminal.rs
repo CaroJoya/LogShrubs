@@ -1,6 +1,6 @@
 // src/output/terminal.rs
 
-use crate::model::{ErrorSummary, Stats};
+use crate::model::{ErrorSpike, ErrorSummary, Stats};
 
 /// Print a Stats summary to stdout in human-readable form.
 pub fn print_stats(source: &str, stats: &Stats) {
@@ -59,6 +59,30 @@ pub fn print_errors(source: &str, summary: &ErrorSummary, top_n: usize) {
             i + 1,
             truncate(&entry.message, 40),
             entry.count
+        );
+    }
+
+    print_spikes(&summary.spikes);
+}
+
+/// Print a list of detected error spikes.
+pub fn print_spikes(spikes: &[ErrorSpike]) {
+    println!();
+    println!("ERROR SPIKES");
+    println!("─────────────────────────────────");
+
+    if spikes.is_empty() {
+        println!("(no significant spikes detected)");
+        return;
+    }
+
+    for spike in spikes {
+        println!(
+            "{} → {}   {:>5} errors   ⚠ {:.1}× normal",
+            spike.bucket_start.format("%H:%M"),
+            spike.bucket_end.format("%H:%M"),
+            spike.count,
+            spike.severity,
         );
     }
 }

@@ -39,7 +39,6 @@ impl Level {
         }
     }
 
-    #[allow(dead_code)]
     pub fn is_error(&self) -> bool {
         matches!(self, Level::Error | Level::Fatal)
     }
@@ -51,7 +50,6 @@ pub struct LogEvent {
     pub timestamp: Option<DateTime<Utc>>,
     pub level: Option<Level>,
     pub message: String,
-    #[allow(dead_code)]
     pub http: Option<HttpInfo>,
 }
 
@@ -66,7 +64,6 @@ pub struct HttpInfo {
 
 /// Result of running the analysis engine over a log input.
 #[derive(Debug, Clone, Serialize)]
-#[allow(dead_code)]
 pub struct AnalysisResult {
     pub source: String,
     pub total_lines: u64,
@@ -115,7 +112,6 @@ pub struct ErrorSpike {
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
-#[allow(dead_code)]
 pub struct TimeSummary {
     pub first: Option<DateTime<Utc>>,
     pub last: Option<DateTime<Utc>>,
@@ -123,7 +119,6 @@ pub struct TimeSummary {
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
-#[allow(dead_code)]
 pub struct HttpSummary {
     pub total_requests: u64,
     pub s2xx: u64,
@@ -135,7 +130,6 @@ pub struct HttpSummary {
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[allow(dead_code)]
 pub struct EndpointCount {
     pub path: String,
     pub count: u64,

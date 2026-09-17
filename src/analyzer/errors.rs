@@ -15,6 +15,7 @@ use std::collections::HashMap;
 pub struct ErrorAccumulator {
     counts: HashMap<String, u64>,
     total: u64,
+    spikes: crate::analyzer::spikes::SpikeAccumulator,
 }
 
 impl ErrorAccumulator {
@@ -32,6 +33,10 @@ impl ErrorAccumulator {
         let normalized = normalize(&event.message);
         *self.counts.entry(normalized).or_insert(0) += 1;
         self.total += 1;
+
+        if let Some(ts) = event.timestamp {
+            self.spikes.observe(ts);
+        }
     }
 
     /// Consume the accumulator and produce the final ErrorSummary.
@@ -51,7 +56,7 @@ impl ErrorAccumulator {
         ErrorSummary {
             total: self.total,
             top,
-            spikes: Vec::new(), // Step 5 fills this in
+            spikes: self.spikes.finish(),
         }
     }
 }

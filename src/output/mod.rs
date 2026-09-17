@@ -1,3 +1,3 @@
-// src/output/mod.rs
-
-pub mod terminal;
+// src/output/mod.rs 
+ 
+pub mod terminal; 
