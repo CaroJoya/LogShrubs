@@ -50,9 +50,7 @@ pub enum Command {
     },
 
     /// Show overall statistics only
-    Stats {
-        file: PathBuf,
-    },
+    Stats { file: PathBuf },
 
     /// Analyze HTTP requests only
     Http {

@@ -83,11 +83,7 @@ impl SpikeAccumulator {
             .into_iter()
             .filter(|(_, count)| *count as f64 > threshold && *count >= MIN_SPIKE_COUNT)
             .map(|(start, count)| {
-                let severity = if mean > 0.0 {
-                    count as f64 / mean
-                } else {
-                    0.0
-                };
+                let severity = if mean > 0.0 { count as f64 / mean } else { 0.0 };
                 ErrorSpike {
                     bucket_start: start,
                     bucket_end: start + Duration::minutes(BUCKET_MINUTES),
@@ -167,7 +163,7 @@ mod tests {
         }
         acc.observe(ts(1767225600 + 5 * 5 * 60));
         acc.observe(ts(1767225600 + 5 * 5 * 60)); // now that bucket has 3
-        // Not enough spread — depends on stddev. Just confirm no panic.
+                                                  // Not enough spread — depends on stddev. Just confirm no panic.
         let _ = acc.finish();
     }
 }

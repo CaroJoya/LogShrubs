@@ -12,10 +12,13 @@ pub fn parse(message: &str) -> Option<HttpInfo> {
         let method = caps.get(1)?.as_str().to_string();
         let path = caps.get(2)?.as_str().to_string();
         let status: u16 = caps.get(3)?.as_str().parse().ok()?;
-        let duration_ms = caps
-            .get(4)
-            .and_then(|m| m.as_str().parse::<u64>().ok());
-        return Some(HttpInfo { method, path, status, duration_ms });
+        let duration_ms = caps.get(4).and_then(|m| m.as_str().parse::<u64>().ok());
+        return Some(HttpInfo {
+            method,
+            path,
+            status,
+            duration_ms,
+        });
     }
 
     // Pattern B: '"GET /api/products HTTP/1.1" 200'
@@ -23,7 +26,12 @@ pub fn parse(message: &str) -> Option<HttpInfo> {
         let method = caps.get(1)?.as_str().to_string();
         let path = caps.get(2)?.as_str().to_string();
         let status: u16 = caps.get(3)?.as_str().parse().ok()?;
-        return Some(HttpInfo { method, path, status, duration_ms: None });
+        return Some(HttpInfo {
+            method,
+            path,
+            status,
+            duration_ms: None,
+        });
     }
 
     None
@@ -70,7 +78,8 @@ mod tests {
 
     #[test]
     fn parses_combined_apache_style() {
-        let line = r#"192.168.1.1 - - [15/Sep/2026:14:21:04 +0000] "GET /api/products HTTP/1.1" 200 124"#;
+        let line =
+            r#"192.168.1.1 - - [15/Sep/2026:14:21:04 +0000] "GET /api/products HTTP/1.1" 200 124"#;
         let info = parse(line).unwrap();
         assert_eq!(info.method, "GET");
         assert_eq!(info.path, "/api/products");
