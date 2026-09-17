@@ -7,7 +7,7 @@ mod model;
 mod output;
 mod parser;
 
-use analyzer::StatsAccumulator;
+use analyzer::{ErrorAccumulator, StatsAccumulator};
 use clap::Parser;
 use cli::{Cli, Command};
 use input::LogReader;
@@ -38,7 +38,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         Command::Errors { file, top } => {
-            println!("[errors] file={:?} top={}", file, top);
+            let reader = LogReader::open(&file)?;
+            let source = reader.path().display().to_string();
+
+            let mut acc = ErrorAccumulator::new();
+            for line in reader {
+                let event = parser::parse_line(&line);
+                acc.observe(&event);
+            }
+            let summary = acc.finish(top);
+
+            output::terminal::print_errors(&source, &summary, top);
         }
 
         Command::Stats { file } => {
