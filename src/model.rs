@@ -28,17 +28,6 @@ impl Level {
         }
     }
 
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Level::Trace => "TRACE",
-            Level::Debug => "DEBUG",
-            Level::Info => "INFO",
-            Level::Warn => "WARN",
-            Level::Error => "ERROR",
-            Level::Fatal => "FATAL",
-        }
-    }
-
     pub fn is_error(&self) -> bool {
         matches!(self, Level::Error | Level::Fatal)
     }

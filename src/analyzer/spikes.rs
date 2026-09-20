@@ -30,10 +30,6 @@ pub struct SpikeAccumulator {
 }
 
 impl SpikeAccumulator {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     /// Record that an error occurred at `ts`.
     pub fn observe(&mut self, ts: DateTime<Utc>) {
         let bucket = floor_to_bucket(ts);
@@ -126,7 +122,7 @@ mod tests {
 
     #[test]
     fn no_spikes_in_uniform_log() {
-        let mut acc = SpikeAccumulator::new();
+        let mut acc = SpikeAccumulator::default();
         // 10 buckets, 5 errors each — perfectly flat.
         for b in 0..10 {
             for _ in 0..5 {
@@ -138,7 +134,7 @@ mod tests {
 
     #[test]
     fn detects_obvious_spike() {
-        let mut acc = SpikeAccumulator::new();
+        let mut acc = SpikeAccumulator::default();
         // 20 quiet buckets with 1 error each...
         for b in 0..20 {
             acc.observe(ts(1767225600 + b * 5 * 60));
@@ -156,7 +152,7 @@ mod tests {
 
     #[test]
     fn ignores_tiny_buckets() {
-        let mut acc = SpikeAccumulator::new();
+        let mut acc = SpikeAccumulator::default();
         // Below MIN_SPIKE_COUNT (3) — even if statistically odd.
         for b in 0..20 {
             acc.observe(ts(1767225600 + b * 5 * 60));

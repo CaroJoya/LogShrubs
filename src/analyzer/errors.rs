@@ -1,6 +1,6 @@
 // src/analyzer/errors.rs
 
-use crate::model::{ErrorCount, ErrorSummary, Level, LogEvent};
+use crate::model::{ErrorCount, ErrorSummary, LogEvent};
 use std::collections::HashMap;
 
 /// Folds ERROR and FATAL events into a summary of recurring messages.
@@ -25,7 +25,7 @@ impl ErrorAccumulator {
 
     /// Observe one event. Only ERROR and FATAL are recorded.
     pub fn observe(&mut self, event: &LogEvent) {
-        let is_error = matches!(event.level, Some(Level::Error) | Some(Level::Fatal));
+        let is_error = event.level.is_some_and(|l| l.is_error());
         if !is_error {
             return;
         }
@@ -92,6 +92,7 @@ fn normalize(msg: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::Level;
 
     fn event(level: Level, msg: &str) -> LogEvent {
         LogEvent {
