@@ -1,0 +1,4 @@
+2026-09-15 10:00:01 INFO  Application starting
+2026-09-15 10:00:02 DEBUG Config loaded from config.toml
+2026-09-15 10:00:03 WARN  Cache size is low
+2026-09-15 10:00:04 ERROR Database connection failed
