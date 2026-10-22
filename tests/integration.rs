@@ -4,7 +4,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 fn loglens() -> Command {
-    Command::cargo_bin("loglens").expect("binary builds")
+    Command::cargo_bin("logshrubs").expect("binary builds")
 }
 
 fn fixture(name: &str) -> String {

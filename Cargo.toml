@@ -1,5 +1,5 @@
 [package]
-name = "loglens"
+name = "logshrubs"
 version = "0.1.0"
 edition = "2021"
 description = "A fast, local-first log analyzer built with Rust"
@@ -10,7 +10,7 @@ keywords = ["logs", "cli", "analysis", "devops", "observability"]
 categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
-name = "loglens"
+name = "logshrubs"
 path = "src/main.rs"
 
 [dependencies]

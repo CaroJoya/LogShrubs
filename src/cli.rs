@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "loglens",
+    name = "logshrubs",
     version,
     about = "A fast, local-first log analyzer",
     long_about = "LogLens reads application/server log files and turns raw logs \
