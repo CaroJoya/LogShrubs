@@ -54,7 +54,14 @@ pub struct HttpInfo {
 /// Result of running the analysis engine over a log input.
 #[derive(Debug, Clone, Serialize)]
 pub struct AnalysisResult {
+    /// Display label: the path for one input, comma-joined for several.
     pub source: String,
+    /// Every input that was read (`<stdin>` for standard input).
+    pub sources: Vec<String>,
+    /// Log format used for each input (same order as `sources`).
+    pub formats: Vec<String>,
+    /// Total input size in bytes; `None` when any input is stdin.
+    pub size_bytes: Option<u64>,
     pub total_lines: u64,
     pub parsed_events: u64,
     pub stats: Stats,
@@ -116,6 +123,23 @@ pub struct HttpSummary {
     pub s5xx: u64,
     pub other: u64,
     pub top_endpoints: Vec<EndpointCount>,
+    /// Latency statistics; `None` when no request carried a duration.
+    pub avg_ms: Option<f64>,
+    pub min_ms: Option<u64>,
+    pub median_ms: Option<u64>,
+    pub p95_ms: Option<u64>,
+    pub p99_ms: Option<u64>,
+    pub max_ms: Option<u64>,
+    /// Endpoints with the highest average latency, slowest first.
+    pub slowest_endpoints: Vec<EndpointLatency>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct EndpointLatency {
+    pub path: String,
+    pub avg_ms: f64,
+    /// Number of requests that carried a duration.
+    pub count: u64,
 }
 
 #[derive(Debug, Clone, Serialize)]

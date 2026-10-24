@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 ///     let mut acc = StatsAccumulator::new();
 ///     for event in events { acc.observe(&event); }
 ///     let stats = acc.finish();
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct StatsAccumulator {
     info: u64,
     debug: u64,
@@ -53,6 +53,25 @@ impl StatsAccumulator {
                 _ => {}
             }
         }
+    }
+
+    /// Fold another accumulator (e.g. from a different file) into this one.
+    pub fn merge(&mut self, other: StatsAccumulator) {
+        self.info += other.info;
+        self.debug += other.debug;
+        self.warn += other.warn;
+        self.error += other.error;
+        self.fatal += other.fatal;
+        self.trace += other.trace;
+        self.unleveled += other.unleveled;
+        self.first_timestamp = match (self.first_timestamp, other.first_timestamp) {
+            (Some(a), Some(b)) => Some(a.min(b)),
+            (a, b) => a.or(b),
+        };
+        self.last_timestamp = match (self.last_timestamp, other.last_timestamp) {
+            (Some(a), Some(b)) => Some(a.max(b)),
+            (a, b) => a.or(b),
+        };
     }
 
     /// Consume the accumulator and produce the final Stats value.

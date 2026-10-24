@@ -23,7 +23,7 @@ const SMALL_SAMPLE_BUCKETS: usize = 6;
 const SIGMA_THRESHOLD_SMALL: f64 = 1.0;
 
 /// Collects error timestamps and computes which time buckets stand out.
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct SpikeAccumulator {
     /// bucket_start → error count in that bucket
     buckets: BTreeMap<DateTime<Utc>, u64>,
@@ -34,6 +34,13 @@ impl SpikeAccumulator {
     pub fn observe(&mut self, ts: DateTime<Utc>) {
         let bucket = floor_to_bucket(ts);
         *self.buckets.entry(bucket).or_insert(0) += 1;
+    }
+
+    /// Fold another accumulator's buckets into this one.
+    pub fn merge(&mut self, other: SpikeAccumulator) {
+        for (bucket, count) in other.buckets {
+            *self.buckets.entry(bucket).or_insert(0) += count;
+        }
     }
 
     /// Compute spikes from the accumulated buckets.
@@ -90,13 +97,13 @@ impl SpikeAccumulator {
             .collect();
 
         // Sort by count desc — biggest spikes first.
-        spikes.sort_by(|a, b| b.count.cmp(&a.count));
+        spikes.sort_by_key(|s| std::cmp::Reverse(s.count));
         spikes
     }
 }
 
 /// Round `ts` down to the nearest 5-minute boundary.
-fn floor_to_bucket(ts: DateTime<Utc>) -> DateTime<Utc> {
+pub fn floor_to_bucket(ts: DateTime<Utc>) -> DateTime<Utc> {
     let secs = ts.timestamp();
     let bucket_secs = BUCKET_MINUTES * 60;
     let floored = secs - (secs.rem_euclid(bucket_secs));

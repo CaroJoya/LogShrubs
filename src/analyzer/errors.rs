@@ -11,7 +11,7 @@ use std::collections::HashMap;
 ///     "User 18273 failed authentication"
 ///     "User 18291 failed authentication"
 ///     →  "User <NUM> failed authentication"  (count: 2)
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct ErrorAccumulator {
     counts: HashMap<String, u64>,
     total: u64,
@@ -37,6 +37,15 @@ impl ErrorAccumulator {
         if let Some(ts) = event.timestamp {
             self.spikes.observe(ts);
         }
+    }
+
+    /// Fold another accumulator (e.g. from a different file) into this one.
+    pub fn merge(&mut self, other: ErrorAccumulator) {
+        for (msg, count) in other.counts {
+            *self.counts.entry(msg).or_insert(0) += count;
+        }
+        self.total += other.total;
+        self.spikes.merge(other.spikes);
     }
 
     /// Consume the accumulator and produce the final ErrorSummary.
@@ -135,6 +144,20 @@ mod tests {
         assert_eq!(summary.top.len(), 1);
         assert_eq!(summary.top[0].message, "User <NUM> failed authentication");
         assert_eq!(summary.top[0].count, 2);
+    }
+
+    #[test]
+    fn merge_equals_sequential() {
+        let mut a = ErrorAccumulator::new();
+        let mut b = ErrorAccumulator::new();
+        a.observe(&event(Level::Error, "boom 1"));
+        b.observe(&event(Level::Error, "boom 2"));
+        b.observe(&event(Level::Fatal, "other"));
+        a.merge(b);
+        let s = a.finish(10);
+        assert_eq!(s.total, 3);
+        assert_eq!(s.top[0].message, "boom <NUM>");
+        assert_eq!(s.top[0].count, 2);
     }
 
     #[test]

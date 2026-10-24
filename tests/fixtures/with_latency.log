@@ -1,0 +1,6 @@
+2026-09-15 14:00:00 GET /api/orders 200 800ms
+2026-09-15 14:00:01 GET /api/orders 200 842ms
+2026-09-15 14:00:02 GET /api/products 200 40ms
+2026-09-15 14:00:03 GET /api/products 200 60ms
+2026-09-15 14:00:04 GET /api/users 200 20ms
+2026-09-15 14:00:05 GET /api/users 200 100ms

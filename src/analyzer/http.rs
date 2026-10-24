@@ -1,10 +1,11 @@
 // src/analyzer/http.rs
 
+use crate::analyzer::performance::PerformanceAccumulator;
 use crate::model::{EndpointCount, HttpSummary, LogEvent};
 use std::collections::HashMap;
 
 /// Folds HTTP request events into aggregate statistics.
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct HttpAccumulator {
     total_requests: u64,
     s2xx: u64,
@@ -13,6 +14,7 @@ pub struct HttpAccumulator {
     s5xx: u64,
     other: u64,
     endpoints: HashMap<String, u64>,
+    perf: PerformanceAccumulator,
 }
 
 impl HttpAccumulator {
@@ -38,6 +40,24 @@ impl HttpAccumulator {
         }
 
         *self.endpoints.entry(info.path.clone()).or_insert(0) += 1;
+
+        if let Some(d) = info.duration_ms {
+            self.perf.observe(&info.path, d);
+        }
+    }
+
+    /// Fold another accumulator (e.g. from a different file) into this one.
+    pub fn merge(&mut self, other: HttpAccumulator) {
+        self.total_requests += other.total_requests;
+        self.s2xx += other.s2xx;
+        self.s3xx += other.s3xx;
+        self.s4xx += other.s4xx;
+        self.s5xx += other.s5xx;
+        self.other += other.other;
+        for (path, count) in other.endpoints {
+            *self.endpoints.entry(path).or_insert(0) += count;
+        }
+        self.perf.merge(other.perf);
     }
 
     /// Consume the accumulator and produce the final HttpSummary.
@@ -54,6 +74,8 @@ impl HttpAccumulator {
             .map(|(path, count)| EndpointCount { path, count })
             .collect();
 
+        let perf = self.perf.finish(top_n);
+
         HttpSummary {
             total_requests: self.total_requests,
             s2xx: self.s2xx,
@@ -62,6 +84,13 @@ impl HttpAccumulator {
             s5xx: self.s5xx,
             other: self.other,
             top_endpoints,
+            avg_ms: perf.avg_ms,
+            min_ms: perf.min_ms,
+            median_ms: perf.median_ms,
+            p95_ms: perf.p95_ms,
+            p99_ms: perf.p99_ms,
+            max_ms: perf.max_ms,
+            slowest_endpoints: perf.slowest_endpoints,
         }
     }
 }
@@ -124,6 +153,28 @@ mod tests {
         let s = acc.finish(10);
         assert_eq!(s.top_endpoints[0].path, "/users");
         assert_eq!(s.top_endpoints[0].count, 2);
+    }
+
+    #[test]
+    fn latency_feeds_summary() {
+        let mut acc = HttpAccumulator::new();
+        acc.observe(&ev("GET", "/a", 200, Some(100)));
+        acc.observe(&ev("GET", "/a", 200, Some(300)));
+        acc.observe(&ev("GET", "/b", 200, None));
+        let s = acc.finish(10);
+        assert_eq!(s.avg_ms, Some(200.0));
+        assert_eq!(s.max_ms, Some(300));
+        assert_eq!(s.slowest_endpoints.len(), 1);
+        assert_eq!(s.slowest_endpoints[0].path, "/a");
+    }
+
+    #[test]
+    fn no_durations_no_latency() {
+        let mut acc = HttpAccumulator::new();
+        acc.observe(&ev("GET", "/a", 200, None));
+        let s = acc.finish(10);
+        assert!(s.avg_ms.is_none());
+        assert!(s.slowest_endpoints.is_empty());
     }
 
     #[test]

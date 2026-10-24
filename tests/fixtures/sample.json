@@ -1,0 +1,6 @@
+{"timestamp":"2026-09-15T14:00:00Z","level":"info","message":"server started"}
+{"time":"2026-09-15T14:00:01Z","severity":"WARNING","msg":"slow disk"}
+{"ts":"2026-09-15T14:00:02Z","lvl":"error","msg":"Database timeout after 30 s"}
+{"ts":"2026-09-15T14:00:03Z","lvl":"error","msg":"Database timeout after 45 s"}
+{"ts":"2026-09-15T14:00:04Z","level":"info","msg":"request","method":"GET","path":"/api/orders","status":200,"duration_ms":120}
+{"level":"ERROR","msg":"broken line without closing brace

@@ -1,8 +1,6 @@
-2026-09-15 11:00:01 INFO  Starting
-2026-09-15 11:00:02 ERROR Database timeout
-2026-09-15 11:00:03 ERROR Database timeout
-2026-09-15 11:00:04 ERROR Database timeout
-2026-09-15 11:00:05 WARN  Retrying
-2026-09-15 11:00:06 ERROR Auth failed for user 42
-2026-09-15 11:00:07 ERROR Auth failed for user 99
-2026-09-15 11:00:08 FATAL Shutting down
+2026-09-15 14:00:00 ERROR Database timeout
+2026-09-15 14:00:01 ERROR Database timeout
+2026-09-15 14:00:02 ERROR Auth failed for user 123
+2026-09-15 14:00:03 ERROR Auth failed for user 456
+2026-09-15 14:00:04 ERROR Database timeout
+2026-09-15 14:00:05 INFO auth success
