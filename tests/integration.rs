@@ -410,19 +410,28 @@ fn http_shows_response_time_and_slow_endpoints() {
         .clone();
     let s = String::from_utf8(out).unwrap();
     let slow = s.split("SLOW ENDPOINTS").nth(1).unwrap();
-    
+
     let lines: Vec<&str> = slow.lines().filter(|l| !l.trim().is_empty()).collect();
     // We expect the header line, then 3 endpoints.
     // The first endpoint should be /api/orders
-    assert!(lines.iter().any(|l| l.contains("/api/orders")), "Missing /api/orders");
-    assert!(lines.iter().any(|l| l.contains("/api/users")), "Missing /api/users");
-    assert!(lines.iter().any(|l| l.contains("/api/products")), "Missing /api/products");
-    
+    assert!(
+        lines.iter().any(|l| l.contains("/api/orders")),
+        "Missing /api/orders"
+    );
+    assert!(
+        lines.iter().any(|l| l.contains("/api/users")),
+        "Missing /api/users"
+    );
+    assert!(
+        lines.iter().any(|l| l.contains("/api/products")),
+        "Missing /api/products"
+    );
+
     // Verify order by checking positions in the raw string (ignoring spacing issues)
     let orders_idx = slow.find("/api/orders").unwrap();
     let users_idx = slow.find("/api/users").unwrap();
     let products_idx = slow.find("/api/products").unwrap();
-    
+
     assert!(
         orders_idx < users_idx && users_idx < products_idx,
         "bad order:\n{}",
